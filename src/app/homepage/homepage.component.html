@@ -1,14 +1,8 @@
 <mat-vertical-stepper #stepper>
   <mat-step label="Select a server">
     <mat-selection-list (selectionChange)="onServerChange($event, stepper)" [multiple]="false">
-      <mat-list-option [value]="'http://localhost:5001/'">
-        http://localhost:5001/
-      </mat-list-option>
-      <mat-list-option [value]="'http://localhost:5002/'">
-        http://localhost:5002/
-      </mat-list-option>
       <mat-list-option [value]="'https://idblch.herokuapp.com/'">
-        http://localhost:5003/
+        https://idblch.herokuapp.com/
       </mat-list-option>
     </mat-selection-list>
   </mat-step>
