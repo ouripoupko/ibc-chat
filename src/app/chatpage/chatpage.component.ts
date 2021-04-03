@@ -22,7 +22,12 @@ export class ChatpageComponent implements OnInit {
     this.id = '';
     this.title = 'Topics';
     this.contractService.listen().addEventListener('message', message => {
-      this.counter = this.counter + 1;
+      if(message.data=="True") {
+        this.counter = this.counter + 1;
+        console.log("True");
+      } else {
+        console.log("False");
+      }
     });
   }
 }
