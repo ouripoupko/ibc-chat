@@ -1,17 +1,18 @@
-export interface Reaction {
-  [key: string]: string;
+export interface Reference {
+  ref: number;
+  tags: string[];
+  owner: string;
 }
 
 export interface Statement {
-  parent: number;
-  me: number;
-  kids: number[];
+  parents: Reference[];
+  kids: Reference[];
   owner: string;
   text: string;
-  reactions: Reaction;
-  reply_type: string;
-  version: number;
-  kids_version: number;
+  tags: string[];
+  scoring: any[];
+  ranking_kids: any[];
+  counter: number;
 }
 
 export interface Collection {

@@ -18,6 +18,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import { HomepageComponent } from './homepage/homepage.component';
 import {MatListModule} from '@angular/material/list';
 import {MatStepperModule} from '@angular/material/stepper';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import {MatStepperModule} from '@angular/material/stepper';
     MatInputModule,
     DragDropModule,
     MatListModule,
-    MatStepperModule
+    MatStepperModule,
+    MatProgressSpinnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

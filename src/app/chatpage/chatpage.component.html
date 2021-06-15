@@ -1,6 +1,6 @@
 <mat-card>
   <mat-card-title>{{title}}</mat-card-title>
   <mat-card-content>
-    <app-list [sid]="id" [version]="counter"></app-list>
+    <app-list [sid]="id" [events]="updateTree.asObservable()"></app-list>
   </mat-card-content>
 </mat-card>

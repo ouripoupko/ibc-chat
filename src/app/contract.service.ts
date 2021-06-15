@@ -49,7 +49,7 @@ export class ContractService {
 
 
   listen(): EventSource {
-    return new EventSource(`${this.url}stream/${this.identity}/${this.contract}`);
+    return new EventSource(`${this.url}stream?channel=${this.identity}${this.contract}`);
   }
 
   getStatements(method: Method): Observable<Collection> {
@@ -57,6 +57,14 @@ export class ContractService {
     return this.http.post<Collection>(url, method, this.httpOptions).pipe(
 //      tap((list: Collection) => console.log(list)),
       catchError(this.handleError<Collection>(`getContract name=${name}`))
+    );
+  }
+
+  getUpdates(method: Method): Observable<any> {
+    const url = `${this.url}ibc/app/${this.identity}/${this.contract}/${method.name}`;
+    return this.http.post<any>(url, method, this.httpOptions).pipe(
+//      tap((list: Collection) => console.log(list)),
+      catchError(this.handleError<any>(`getContract name=${name}`))
     );
   }
 

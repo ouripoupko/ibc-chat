@@ -1,15 +1,20 @@
-<mat-accordion *ngIf="order" cdkDropList (cdkDropListDropped)="drop($event)">
-  <mat-expansion-panel *ngFor="let index of order" cdkDrag>
+<mat-accordion class="example-headers-align" *ngIf="order" cdkDropList (cdkDropListDropped)="drop($event)">
+  <mat-expansion-panel *ngFor="let index of order" cdkDrag (opened)="changePanelState(index, true)"
+                       (closed)="changePanelState(index, false)">
     <mat-expansion-panel-header>
-      {{kids[index].text}}
+      <mat-panel-title>
+        {{kids[index].text}}
+      </mat-panel-title>
+      <mat-panel-description>
+        {{kids[index].owner}}
+        <mat-icon class="material-icons color_red" *ngIf="shouldUpdate[index]">mark_chat_unread</mat-icon>
+      </mat-panel-description>
     </mat-expansion-panel-header>
-    <mat-panel-description>
-      {{kids[index].owner}}
-    </mat-panel-description>
-    <app-list [sid]="index" [version]="kids[index].kids_version"></app-list>
+    <app-list [sid]="index" [events]="updateChild[index].asObservable()"></app-list>
   </mat-expansion-panel>
 </mat-accordion>
-<form (submit)="submit(); inputField.blur()">
+<mat-spinner *ngIf="waiting"></mat-spinner>
+<form (submit)="submit(); inputField.blur()" *ngIf="!waiting">
   <mat-icon (click)="inputField.focus()">add</mat-icon>
   <mat-form-field >
     <input matInput placeholder="add new statement" [formControl]="statementForm" #inputField>
