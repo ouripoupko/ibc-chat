@@ -49,7 +49,7 @@ export class ContractService {
 
 
   listen(): EventSource {
-    return new EventSource(`${this.url}stream?channel=${this.identity}${this.contract}`);
+    return new EventSource(`${this.url}stream/${this.identity}/${this.contract}`);
   }
 
   getStatements(method: Method): Observable<Collection> {
