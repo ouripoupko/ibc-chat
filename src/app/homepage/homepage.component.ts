@@ -12,6 +12,9 @@ export class HomepageComponent implements OnInit {
 
   identities: string[];
   contracts: Contract[];
+  server: string;
+  agent: string;
+  contract: string;
 
   constructor(
     private router: Router,
@@ -24,19 +27,21 @@ export class HomepageComponent implements OnInit {
   onServerChange(event, stepper) {
     this.identities = null;
     this.contracts = null;
-    this.contractService.getIdentities(event.option.value)
+    this.server = event.option.value;
+    this.contractService.getIdentities(this.server)
       .subscribe(identities => {this.identities = identities; stepper.next();});
   }
 
   onIdentityChange(event, stepper) {
     this.contracts = null;
-    this.contractService.getContracts(event.option.value)
+    this.agent = event.option.value;
+    this.contractService.getContracts(this.server, this.agent)
       .subscribe(contracts => {this.contracts = contracts; stepper.next();});
   }
 
   onContractChange(event) {
-    this.contractService.setContract(event.option.value);
-    this.router.navigate(['chat']);
+    this.contract = event.option.value;
+    this.router.navigate([`${encodeURIComponent(this.server)}/${this.agent}/${this.contract}`]);
   }
 
 }

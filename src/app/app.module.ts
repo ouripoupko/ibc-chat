@@ -19,13 +19,17 @@ import { HomepageComponent } from './homepage/homepage.component';
 import {MatListModule} from '@angular/material/list';
 import {MatStepperModule} from '@angular/material/stepper';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatButtonModule} from '@angular/material/button';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import { ItemComponent } from './chatpage/item/item.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ChatpageComponent,
     ListComponent,
-    HomepageComponent
+    HomepageComponent,
+    ItemComponent
   ],
   imports: [
     HttpClientModule,
@@ -42,7 +46,9 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
     DragDropModule,
     MatListModule,
     MatStepperModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatButtonModule,
+    MatButtonToggleModule
   ],
   providers: [],
   bootstrap: [AppComponent]

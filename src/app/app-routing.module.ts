@@ -5,7 +5,7 @@ import { HomepageComponent } from './homepage/homepage.component';
 
 const routes: Routes = [
   { path: '', component: HomepageComponent},
-  { path: 'chat', component: ChatpageComponent }
+  { path: ':server/:agent/:contract', component: ChatpageComponent }
 ];
 
 

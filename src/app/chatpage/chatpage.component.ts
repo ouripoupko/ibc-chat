@@ -3,6 +3,8 @@ import { Subject } from 'rxjs';
 import { ContractService } from '../contract.service';
 import { Statement } from '../statement'
 import { Method } from '../contract';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TreeEvent } from './list/list.component';
 
 @Component({
   selector: 'app-chatpage',
@@ -11,34 +13,37 @@ import { Method } from '../contract';
 })
 export class ChatpageComponent implements OnInit {
 
-  id: string;
-  title: string;
+  server: string;
+  agent: string;
+  contract: string;
   counter: number = 0;
   updateTree: Subject<any> = new Subject<any>();
 
   constructor(
-    private contractService: ContractService,
+    private route: ActivatedRoute,
+    private contractService: ContractService
   ) {}
 
   getUpdates(): void {
-    this.contractService.getUpdates({ name: 'get_updates', values: {'counter': this.counter}} as Method)
+    let method = { name: 'get_updates', values: {'counter': this.counter}} as Method;
+    this.contractService.read(this.server, this.agent, this.contract, method)
       .subscribe(updates => {
         for (let record of updates) {
           if(record['record']['counter'] > this.counter) {
             this.counter = record['record']['counter'];
           }
-          this.updateTree.next(record);
+          this.updateTree.next({'event': 'update', 'data': record} as TreeEvent);
         }
       });
   }
 
 
   ngOnInit(): void {
-    this.id = '';
-    this.title = 'Topics';
+    this.server = decodeURIComponent(this.route.snapshot.paramMap.get('server'));
+    this.agent = this.route.snapshot.paramMap.get('agent');
+    this.contract = this.route.snapshot.paramMap.get('contract');
     console.log('page is init');
-    this.contractService.listen().addEventListener('message', message => {
-      console.log(message);
+    this.contractService.listen(this.server, this.agent, this.contract).addEventListener('message', message => {
       if(message.data=="True") {
         this.getUpdates();
       } else {
@@ -48,6 +53,6 @@ export class ChatpageComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
-    this.updateTree.next();
+    this.updateTree.next({'event': 'init', 'data': true} as TreeEvent);
   }
 }

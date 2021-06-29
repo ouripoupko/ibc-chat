@@ -1,0 +1,25 @@
+<mat-expansion-panel class="example-headers-align" (opened)="changePanelState(true)" (closed)="changePanelState(false)">
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      {{statement.text}}
+    </mat-panel-title>
+    <mat-panel-description (click)="$event.stopPropagation();">
+      {{statement.owner}}
+      <div>
+        <div *ngIf="dropInProgress">
+          <button mat-icon-button>
+            <mat-icon class="material-icons color_green" (click)="onOrderApprove()">check_circle</mat-icon>
+          </button>
+          <button mat-icon-button>
+            <mat-icon class="material-icons color_red" (click)="onOrderCancel()">cancel</mat-icon>
+          </button>
+        </div>
+        <mat-icon class="material-icons color_red" *ngIf="shouldUpdate">mark_chat_unread</mat-icon>
+        <button mat-icon-button (click)="toggleOrder()" *ngIf="isOpened && hasKids">
+          <mat-icon [ngClass]="{'material-icons': true, 'color_blue': !kid_aggregated, 'color_grey': kid_aggregated}">swap_vert_disabled</mat-icon>
+        </button>
+      </div>
+    </mat-panel-description>
+  </mat-expansion-panel-header>
+  <app-list [sid]="sid" [aggregated]="kid_aggregated" [events]="updateList.asObservable()" (dropEvent)="startDropping($event)"></app-list>
+</mat-expansion-panel>

@@ -1,0 +1,25 @@
+.example-headers-align .mat-expansion-panel-header-title,
+.example-headers-align .mat-expansion-panel-header-description {
+  flex-basis: 0;
+}
+
+.example-headers-align .mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.material-icons.color_red {
+  color: #FF0000;
+}
+
+.material-icons.color_green {
+  color: #00FF00;
+}
+
+.material-icons.color_blue {
+  color: #0000FF;
+}
+
+.material-icons.color_grey {
+  color: #888888;
+}

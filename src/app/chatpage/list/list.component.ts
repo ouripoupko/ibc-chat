@@ -1,10 +1,16 @@
-import { Component, OnInit, OnDestroy, Input, OnChanges } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, OnChanges, Output, EventEmitter } from '@angular/core';
 import { Subscription, Observable, Subject } from 'rxjs';
 import { Collection } from '../../statement';
 import { Method } from '../../contract';
 import { FormControl } from '@angular/forms';
 import { ContractService } from '../../contract.service';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
+import { ActivatedRoute } from '@angular/router';
+
+export interface TreeEvent {
+  event: string;
+  data: any;
+}
 
 @Component({
   selector: 'app-list',
@@ -13,45 +19,62 @@ import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 })
 export class ListComponent implements OnInit, OnDestroy {
 
+  server: string;
+  agent: string;
+  contract: string;
   @Input() sid: string;
   private eventsSubscription: Subscription;
-  @Input() events: Observable<any>;
+  @Input() events: Observable<TreeEvent>;
   kids: Collection = {};
+  updateKids = {};
   order: string[] = [];
-  updateChild = {};
+  rev_order: string[] = [];
   statementForm: FormControl = new FormControl();
   waiting = true;
-  isOpened = {};
-  shouldUpdate = {};
+  firstDrop = true;
+  oldOrder = [];
+  @Output() dropEvent = new EventEmitter<string>();
+  @Input() aggregated;
 
-  constructor( private contractService: ContractService ) {
+  constructor(
+    private contractService: ContractService,
+    private route: ActivatedRoute
+  ) {
   }
 
   ngOnInit(): void {
-    console.log(`list is init ${this.sid}`)
+    this.server = decodeURIComponent(this.route.snapshot.paramMap.get('server'));
+    this.agent = this.route.snapshot.paramMap.get('agent');
+    this.contract = this.route.snapshot.paramMap.get('contract');
     this.eventsSubscription = this.events.subscribe((record) => {
-      if(record && record != false) {
+      if(record['event'] == 'update') {
         let shouldSkip = false;
-        Object.entries(record['keys']).forEach(
+        Object.entries(record['data']['keys']).forEach(
           ([sid, paths]) => {
             if (!shouldSkip) {
               if(sid in this.kids) {
-                if(this.isOpened[sid]) {
-                  let tmp = {'keys': paths, 'record': record['record']};
-                  console.log(tmp);
-                  this.updateChild[sid].next(tmp)
-                  this.shouldUpdate[sid] = false;
-                } else {
-                  if(Object.entries(paths).length > 0) {
-                    this.shouldUpdate[sid] = true;
-                  }
-                }
+                let event = {'event': "update",
+                             'data': {'keys': paths, 'record': record['data']['record']}} as TreeEvent;
+                this.updateKids[sid].next(event);
               } else {
                 this.getStatements();
               }
             }
           }
         );
+      }
+      else if(record['event'] == 'drop_done') {
+        console.log('drop done: ' + record['data']);
+        if(record['data']) {
+          const method = { name: 'set_ranking',
+                           values: {'sid': this.sid, 'order': this.order}} as Method;
+          this.contractService.write(this.server, this.agent, this.contract, method)
+            .subscribe();
+        } else {
+          this.order = Object.assign([], this.oldOrder);
+        }
+        this.oldOrder = [];
+        this.firstDrop = true;
       }
       else {
         this.getStatements();
@@ -60,16 +83,7 @@ export class ListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.eventsSubscription.unsubscribe();
-  }
-
-  changePanelState(index, isOpened): void {
-    console.log(`panel changed ${isOpened}, ${this.sid}`)
-    this.isOpened[index] = isOpened;
-    if(isOpened) {
-      this.updateChild[index].next(false);
-      this.shouldUpdate[index] = false;
-    }
+     this.eventsSubscription.unsubscribe();
   }
 
   submit() {
@@ -81,31 +95,41 @@ export class ListComponent implements OnInit, OnDestroy {
   createStatement(statement): void {
     const method = { name: 'create_statement',
                      values: {'parents': this.sid ? [this.sid] : [], 'text': statement, 'tags': []}} as Method;
-    this.contractService.createStatement(method)
+    this.contractService.write(this.server, this.agent, this.contract, method)
       .subscribe();
   }
 
   getStatements(): void {
     this.waiting = true;
-    this.contractService.getStatements({ name: 'get_statements', values: {'parent': this.sid}} as Method)
+    const method = { name: 'get_statements', values: {'parent': this.sid}} as Method;
+    this.contractService.read(this.server, this.agent, this.contract, method)
       .subscribe(collection => {
         this.order = [];
-        Object.entries(collection).forEach(
+        this.rev_order = [];
+        Object.entries(collection as Collection).forEach(
           ([sid, statement]) => {
             if(!(sid in this.kids)) {
-              this.updateChild[sid] = new Subject<any>();
-              this.isOpened[sid] = false;
-              this.shouldUpdate[sid] = (Object.keys(statement['kids']).length > 0);
+              this.updateKids[sid] = new Subject<TreeEvent>()
             }
             this.kids[sid] = statement;
             this.order.push(sid);
+            this.rev_order.unshift(sid);
           }
         );
+
         this.waiting = false;
       });
   }
 
   drop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.order, event.previousIndex, event.currentIndex);
+    if(event.previousIndex != event.currentIndex && this.sid) {
+      if(this.firstDrop) {
+        this.dropEvent.emit(this.sid);
+        this.firstDrop = false;
+        this.oldOrder = Object.assign([], this.order);
+      }
+      moveItemInArray(this.order, event.previousIndex, event.currentIndex);
+    }
   }
+
 }
