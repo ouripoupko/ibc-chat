@@ -4,6 +4,7 @@ import { Collection } from '../../statement';
 import { Method } from '../../contract';
 import { FormControl } from '@angular/forms';
 import { ContractService } from '../../contract.service';
+import { TreeService } from '../../tree.service';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 import { ActivatedRoute } from '@angular/router';
 
@@ -38,6 +39,7 @@ export class ListComponent implements OnInit, OnDestroy {
 
   constructor(
     private contractService: ContractService,
+    private treeService: TreeService,
     private route: ActivatedRoute
   ) {
   }
@@ -48,17 +50,21 @@ export class ListComponent implements OnInit, OnDestroy {
     this.contract = this.route.snapshot.paramMap.get('contract');
     this.eventsSubscription = this.events.subscribe((record) => {
       if(record['event'] == 'update') {
-        let shouldSkip = false;
+        this.getOrder();
+        for(let sid of this.order) {
+          this.updateKids[sid] = new Subject<TreeEvent>();
+        }
+        console.log('checkpoint', this.order, this.updateKids);
         Object.entries(record['data']['keys']).forEach(
           ([sid, paths]) => {
-            if (!shouldSkip) {
-              if(sid in this.kids) {
-                let event = {'event': "update",
-                             'data': {'keys': paths, 'record': record['data']['record']}} as TreeEvent;
-                this.updateKids[sid].next(event);
-              } else {
-                this.getStatements();
-              }
+            if(sid in this.kids) {
+              let event = {'event': "update",
+                           'data': {'keys': paths, 'record': record['data']['record']}} as TreeEvent;
+              this.updateKids[sid].next(event);
+              this.getOrder();
+            } else {
+              this.getStatements();
+              this.getOrder();
             }
           }
         );
@@ -78,6 +84,7 @@ export class ListComponent implements OnInit, OnDestroy {
       }
       else {
         this.getStatements();
+        this.getOrder();
       }
     });
   }
@@ -104,15 +111,15 @@ export class ListComponent implements OnInit, OnDestroy {
     const method = { name: 'get_statements', values: {'parent': this.sid}} as Method;
     this.contractService.read(this.server, this.agent, this.contract, method)
       .subscribe(collection => {
-        this.order = [];
+//        this.order = [];
         this.rev_order = [];
         Object.entries(collection as Collection).forEach(
           ([sid, statement]) => {
-            if(!(sid in this.kids)) {
-              this.updateKids[sid] = new Subject<TreeEvent>()
-            }
+//            if(!(sid in this.kids)) {
+//              this.updateKids[sid] = new Subject<TreeEvent>()
+//            }
             this.kids[sid] = statement;
-            this.order.push(sid);
+//            this.order.push(sid);
             this.rev_order.unshift(sid);
           }
         );
@@ -132,4 +139,15 @@ export class ListComponent implements OnInit, OnDestroy {
     }
   }
 
+  getOrder() {
+    if(!(this.sid in this.treeService.collection)) return;
+    let agent = this.treeService.agent;
+    if(this.aggregated && (this.sid in this.treeService.aggregateOrder))
+      this.order = this.treeService.aggregateOrder[this.sid];
+    else if (this.aggregated || !(agent in this.treeService.collection[this.sid].ranking_kids))
+      this.order = this.treeService.collection[this.sid].kids.map(ref => ref.ref);
+    else
+      this.order = this.treeService.collection[this.sid].ranking_kids[agent];
+    console.log('order', this.order);
+  }
 }

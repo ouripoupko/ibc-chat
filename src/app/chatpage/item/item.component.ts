@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { Subscription, Observable, Subject } from 'rxjs';
 import { TreeEvent } from '../list/list.component';
 import { Statement } from '../../statement';
+import { TreeService } from '../../tree.service';
 
 @Component({
   selector: 'app-item',
@@ -17,13 +18,17 @@ export class ItemComponent implements OnInit {
   shouldUpdate = false;
   dropInProgress = false;
   hasKids = false;
-  kid_aggregated = false;
+  kid_aggregated = true;
   private eventsSubscription: Subscription;
   @Input() events: Observable<TreeEvent>;
 
-  constructor() { }
+  constructor(
+    private treeService: TreeService
+  ) { }
 
   ngOnInit(): void {
+    this.statement = this.treeService.collection[this.sid];
+    console.log('item', this.sid, this.statement);
     this.hasKids = (Object.keys(this.statement['kids']).length > 0);
     this.shouldUpdate = this.hasKids;
     this.eventsSubscription = this.events.subscribe((record) => {

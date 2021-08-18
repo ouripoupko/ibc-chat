@@ -1,5 +1,5 @@
 export interface Reference {
-  ref: number;
+  ref: string;
   tags: string[];
   owner: string;
 }

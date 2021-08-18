@@ -1,8 +1,9 @@
 <mat-accordion *ngIf="order"
                cdkDropList [cdkDropListDisabled]="aggregated || !sid" (cdkDropListDropped)="drop($event)">
-  <app-item *ngFor="let index of (aggregated ? rev_order : order)" cdkDrag
-            [sid]="index" [statement]="kids[index]" [events]="updateKids[index].asObservable()">
-  </app-item>
+  <div *ngFor="let index of order" cdkDrag>
+    <app-item [sid]="index" [events]="updateKids[index].asObservable()">
+    </app-item>
+  </div>
 </mat-accordion>
 <mat-spinner *ngIf="waiting"></mat-spinner>
 <form (submit)="submit(); inputField.blur()" *ngIf="!waiting">

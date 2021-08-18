@@ -1,4 +1,5 @@
-<mat-expansion-panel class="example-headers-align" (opened)="changePanelState(true)" (closed)="changePanelState(false)">
+<mat-expansion-panel *ngIf="statement" class="example-headers-align"
+                     (opened)="changePanelState(true)" (closed)="changePanelState(false)">
   <mat-expansion-panel-header>
     <mat-panel-title>
       {{statement.text}}
