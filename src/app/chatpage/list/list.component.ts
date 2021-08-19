@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, OnChanges, Input, Output, EventEmitter } from '@angular/core';
 import { Subscription, Observable, Subject } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { TreeService } from '../../tree.service';
@@ -17,7 +17,7 @@ export interface TreeEvent {
 export class ListComponent implements OnInit, OnDestroy {
 
   @Input() sid: string;
-  private eventsSubscription: Subscription;
+  private treeSubscription: Subscription;
   @Input() events: Observable<TreeEvent>;
   order: string[] = [];
   statementForm: FormControl = new FormControl();
@@ -25,6 +25,7 @@ export class ListComponent implements OnInit, OnDestroy {
   firstDrop = true;
   @Output() dropEvent = new EventEmitter<string>();
   @Input() aggregated;
+  _array = Array;
 
   constructor(
     private treeService: TreeService
@@ -32,10 +33,9 @@ export class ListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    console.log('list', this.sid);
-    this.update();
-    this.eventsSubscription = this.treeService.notifiers[this.sid].subscribe(() => {
-      this.update();
+    this.getOrder();
+    this.treeSubscription = this.treeService.notifiers[this.sid].subscribe(() => {
+      this.getOrder();
     });
     if (this.events) {
       this.events.subscribe((record) => {
@@ -44,7 +44,7 @@ export class ListComponent implements OnInit, OnDestroy {
           if(record['data']) {
             this.treeService.setRanking(this.sid, this.order);
           }
-          this.update();
+          this.getOrder();
           this.firstDrop = true;
         }
       });
@@ -52,7 +52,13 @@ export class ListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-     this.eventsSubscription.unsubscribe();
+     this.treeSubscription.unsubscribe();
+  }
+
+  ngOnChanges(changes) {
+    if('aggregated' in changes) {
+      this.getOrder();
+    }
   }
 
   submit() {
@@ -71,21 +77,21 @@ export class ListComponent implements OnInit, OnDestroy {
     }
   }
 
-  update() {
-    this.waiting = true;
-    this.getOrder();
-    this.waiting = false;
-  }
-
   getOrder() {
     if(!(this.sid in this.treeService.collection)) return;
     let agent = this.treeService.agent;
-    if(this.aggregated && (this.sid in this.treeService.aggregateOrder))
+    if(this.aggregated && (this.sid in this.treeService.aggregateOrder)) {
       this.order = this.treeService.aggregateOrder[this.sid];
-    else if (this.aggregated || !(agent in this.treeService.collection[this.sid].ranking_kids))
+    }
+    else if (this.aggregated || !(agent in this.treeService.collection[this.sid].ranking_kids)) {
       this.order = this.treeService.collection[this.sid].kids.map(ref => ref.ref);
-    else
+    }
+    else {
+      let kids = this.treeService.collection[this.sid].kids.map(ref => ref.ref);
       this.order = this.treeService.collection[this.sid].ranking_kids[agent];
-    console.log('order', this.order);
+      let missing = kids.filter(item => this.order.indexOf(item) < 0);
+      this.order.push(...missing);
+    }
+    this.waiting = false;
   }
 }

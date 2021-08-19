@@ -46,7 +46,6 @@ export class TreeService {
     let method = { name: 'get_updates', values: {'counter': this.counter}} as Method;
     this.contractService.read(this.server, this.agent, this.contract, method)
       .subscribe(collection => {
-        console.log('updates received');
         let shouldUpdateRoot = false;
         Object.entries(collection as Collection).forEach(
           ([sid, statement]) => {
@@ -68,11 +67,11 @@ export class TreeService {
         if (shouldUpdateRoot) {
           this.notifiers['0'].next();
         }
-        console.log('root', this.collection['0']);
       });
   }
 
   setAggregatedOrder(sid) {
+    if (Object.keys(this.collection[sid]['ranking_kids']).length == 0) return;
     this.aggregateOrder[sid] = [];
     let ranking = this.collection[sid]['ranking_kids'];
     let kids = this.collection[sid].kids.map(({ref, tags, owner}) => (ref));
@@ -128,7 +127,7 @@ export class TreeService {
       prev = lhs;
     }
 
-    this.aggregateOrder = smith_sets;
+    this.aggregateOrder[sid] = smith_sets;
   }
 
   createStatement(sid, statement): void {

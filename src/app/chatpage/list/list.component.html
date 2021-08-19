@@ -1,9 +1,21 @@
 <mat-accordion *ngIf="order"
                cdkDropList [cdkDropListDisabled]="aggregated || sid=='0'" (cdkDropListDropped)="drop($event)">
-  <div *ngFor="let index of order" cdkDrag>
-    <app-item [sid]="index">
-    </app-item>
-  </div>
+  <dif *ngIf="order.length>0 && _array.isArray(order[0]); then thenBlock else elseBlock"></dif>
+  <ng-template #thenBlock>
+    <div *ngFor="let smith of order; let i=index">
+      {{i}}
+      <div *ngFor="let index of smith">
+        <app-item [sid]="index">
+        </app-item>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template #elseBlock>
+    <div *ngFor="let index of order" cdkDrag>
+      <app-item [sid]="index">
+      </app-item>
+    </div>
+  </ng-template>
 </mat-accordion>
 <mat-spinner *ngIf="waiting"></mat-spinner>
 <form (submit)="submit(); inputField.blur()" *ngIf="!waiting">
