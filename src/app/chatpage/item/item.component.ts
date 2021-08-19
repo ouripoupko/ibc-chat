@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Subscription, Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { TreeEvent } from '../list/list.component';
 import { Statement } from '../../statement';
 import { TreeService } from '../../tree.service';
@@ -19,8 +19,6 @@ export class ItemComponent implements OnInit {
   dropInProgress = false;
   hasKids = false;
   kid_aggregated = true;
-  private eventsSubscription: Subscription;
-  @Input() events: Observable<TreeEvent>;
 
   constructor(
     private treeService: TreeService
@@ -31,20 +29,6 @@ export class ItemComponent implements OnInit {
     console.log('item', this.sid, this.statement);
     this.hasKids = (Object.keys(this.statement['kids']).length > 0);
     this.shouldUpdate = this.hasKids;
-    this.eventsSubscription = this.events.subscribe((record) => {
-      if(record['event'] == 'update') {
-        if(this.isOpened) {
-          this.updateList.next(record);
-          this.shouldUpdate = false;
-        } else {
-          if(Object.entries(record['data']['keys']).length > 0) {
-            this.shouldUpdate = true;
-          } else {
-            console.error('why am I here?');
-          }
-        }
-      }
-    });
   }
 
   changePanelState(isOpened): void {

@@ -1,7 +1,7 @@
 <mat-accordion *ngIf="order"
-               cdkDropList [cdkDropListDisabled]="aggregated || !sid" (cdkDropListDropped)="drop($event)">
+               cdkDropList [cdkDropListDisabled]="aggregated || sid=='0'" (cdkDropListDropped)="drop($event)">
   <div *ngFor="let index of order" cdkDrag>
-    <app-item [sid]="index" [events]="updateKids[index].asObservable()">
+    <app-item [sid]="index">
     </app-item>
   </div>
 </mat-accordion>

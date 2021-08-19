@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ContractService } from './contract.service';
@@ -17,6 +17,7 @@ export class TreeService {
   contract: string;
   public collection: Collection = {};
   public aggregateOrder = {};
+  public notifiers = {};
   counter: number = 0;
 
   constructor(
@@ -32,6 +33,7 @@ export class TreeService {
       'ranking_kids': [],
       'counter': 0
     }
+    this.notifiers['0'] = new Subject<void>();
   }
 
   setScope(server, agent, contract) {
@@ -40,24 +42,34 @@ export class TreeService {
     this.contract = contract;
   }
 
-  getUpdates(): Observable<any> {
+  getUpdates() {
     let method = { name: 'get_updates', values: {'counter': this.counter}} as Method;
-    return this.contractService.read(this.server, this.agent, this.contract, method)
-      .pipe(map(updates => {
+    this.contractService.read(this.server, this.agent, this.contract, method)
+      .subscribe(collection => {
         console.log('updates received');
-        for (let record of updates) {
-          if(record['record']['counter'] > this.counter) {
-            this.counter = record['record']['counter'];
+        let shouldUpdateRoot = false;
+        Object.entries(collection as Collection).forEach(
+          ([sid, statement]) => {
+            if(statement['counter'] > this.counter) {
+              this.counter = statement['counter'];
+            }
+            if (!(sid in this.collection)) {
+              this.notifiers[sid] = new Subject<void>();
+              if (statement.parents.length == 0) {
+                this.collection['0'].kids.push({ 'ref': sid, 'tags': [], 'owner': '' });
+                shouldUpdateRoot = true;
+              }
+            }
+            this.collection[sid] = statement;
+            this.setAggregatedOrder(sid);
+            this.notifiers[sid].next();
           }
-          this.collection[record.id] = record.record;
-          this.setAggregatedOrder(record.id);
-          if (record.record.parents.length == 0) {
-            this.collection['0'].kids.push({ 'ref': record.id, 'tags': [], 'owner': '' });
-          }
+        );
+        if (shouldUpdateRoot) {
+          this.notifiers['0'].next();
         }
         console.log('root', this.collection['0']);
-        return updates;
-      }));
+      });
   }
 
   setAggregatedOrder(sid) {
@@ -118,4 +130,18 @@ export class TreeService {
 
     this.aggregateOrder = smith_sets;
   }
+
+  createStatement(sid, statement): void {
+    const method = { name: 'create_statement',
+                     values: {'parents': sid == '0' ? [] : [sid], 'text': statement, 'tags': []}} as Method;
+    this.contractService.write(this.server, this.agent, this.contract, method)
+      .subscribe();
+  }
+
+  setRanking(sid, order) {
+    const method = { name: 'set_ranking',
+                     values: {'sid': sid, 'order': order}} as Method;
+    this.contractService.write(this.server, this.agent, this.contract, method).subscribe();
+  }
+
 }
