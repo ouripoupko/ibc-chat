@@ -28,7 +28,9 @@ export class ItemComponent implements OnInit {
   ngOnInit(): void {
     this.initialize();
     this.treeSubscription = this.treeService.notifiers[this.sid].subscribe(() => {
-      this.initialize();
+      if(!this.dropInProgress) {
+        this.initialize();
+      }
     });
   }
 
@@ -54,6 +56,7 @@ export class ItemComponent implements OnInit {
   onOrderCancel(sid) {
     this.dropInProgress = false;
     this.updateList.next({'event': 'drop_done', 'data': false} as TreeEvent);
+    this.initialize();
   }
 
   toggleOrder(sid) {

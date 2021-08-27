@@ -3,7 +3,7 @@
   <dif *ngIf="order.length>0 && _array.isArray(order[0]); then thenBlock else elseBlock"></dif>
   <ng-template #thenBlock>
     <div *ngFor="let smith of order; let i=index">
-      {{i}}
+      {{i+1}}
       <div *ngFor="let index of smith">
         <app-item [sid]="index">
         </app-item>

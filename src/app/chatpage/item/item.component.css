@@ -1,9 +1,14 @@
-.example-headers-align .mat-expansion-panel-header-title,
-.example-headers-align .mat-expansion-panel-header-description {
-  flex-basis: 0;
+.example-headers-align .mat-expansion-panel-header {
+  min-height: 50px;
+  height: auto;
+}
+
+.example-headers-align .mat-expansion-panel-header-title {
+  flex-basis: 70%;
 }
 
 .example-headers-align .mat-expansion-panel-header-description {
+  flex-basis: 30%;
   justify-content: space-between;
   align-items: center;
 }

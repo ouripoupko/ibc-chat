@@ -33,9 +33,11 @@ export class ListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.getOrder();
+//    this.getOrder();
     this.treeSubscription = this.treeService.notifiers[this.sid].subscribe(() => {
-      this.getOrder();
+      if(this.firstDrop) {
+        this.getOrder();
+      }
     });
     if (this.events) {
       this.events.subscribe((record) => {
@@ -81,14 +83,14 @@ export class ListComponent implements OnInit, OnDestroy {
     if(!(this.sid in this.treeService.collection)) return;
     let agent = this.treeService.agent;
     if(this.aggregated && (this.sid in this.treeService.aggregateOrder)) {
-      this.order = this.treeService.aggregateOrder[this.sid];
+      this.order = Object.assign([], this.treeService.aggregateOrder[this.sid]);
     }
     else if (this.aggregated || !(agent in this.treeService.collection[this.sid].ranking_kids)) {
       this.order = this.treeService.collection[this.sid].kids.map(ref => ref.ref);
     }
     else {
       let kids = this.treeService.collection[this.sid].kids.map(ref => ref.ref);
-      this.order = this.treeService.collection[this.sid].ranking_kids[agent];
+      this.order = Object.assign([], this.treeService.collection[this.sid].ranking_kids[agent]);
       let missing = kids.filter(item => this.order.indexOf(item) < 0);
       this.order.push(...missing);
     }

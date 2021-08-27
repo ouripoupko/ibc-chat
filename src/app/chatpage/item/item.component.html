@@ -16,7 +16,7 @@
           </button>
         </div>
         <mat-icon class="material-icons color_red" *ngIf="shouldUpdate">mark_chat_unread</mat-icon>
-        <button mat-icon-button (click)="toggleOrder()" *ngIf="isOpened && hasKids">
+        <button mat-icon-button (click)="toggleOrder()" *ngIf="isOpened && hasKids && !dropInProgress">
           <mat-icon [ngClass]="{'material-icons': true, 'color_blue': !kid_aggregated, 'color_grey': kid_aggregated}">swap_vert_disabled</mat-icon>
         </button>
       </div>
