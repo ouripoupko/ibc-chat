@@ -64,7 +64,7 @@ export class TreeService {
             this.notifiers[sid].next();
           }
         );
-        if (shouldUpdateRoot) {
+        if (shouldUpdateRoot || this.counter == 0) {
           this.notifiers['0'].next();
         }
       });
