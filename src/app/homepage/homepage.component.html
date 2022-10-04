@@ -1,10 +1,13 @@
 <mat-vertical-stepper #stepper>
   <mat-step label="Select a server">
     <mat-selection-list (selectionChange)="onServerChange($event, stepper)" [multiple]="false">
+<!--      <mat-list-option [value]="'http://talmonlab.bgu.ac.il/'">
+        http://talmonlab.bgu.ac.il/
+      </mat-list-option>
       <mat-list-option [value]="'http://ouri-digital-agent.cf/'">
         http://ouri-digital-agent.cf/
       </mat-list-option>
-      <mat-list-option [value]="'http://localhost:5001/'">
+-->      <mat-list-option [value]="'http://localhost:5001/'">
         http://localhost:5001/
       </mat-list-option>
     </mat-selection-list>
