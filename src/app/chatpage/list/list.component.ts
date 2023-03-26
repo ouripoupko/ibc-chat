@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, OnChanges, Input, Output, EventEmitter } from '@angular/core';
 import { Subscription, Observable, Subject } from 'rxjs';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { TreeService } from '../../tree.service';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 
@@ -20,7 +20,7 @@ export class ListComponent implements OnInit, OnDestroy {
   private treeSubscription: Subscription;
   @Input() events: Observable<TreeEvent>;
   order: string[] = [];
-  statementForm: FormControl = new FormControl();
+  statementForm: UntypedFormControl = new UntypedFormControl();
   waiting = true;
   firstDrop = true;
   @Output() dropEvent = new EventEmitter<string>();
