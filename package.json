@@ -21,6 +21,8 @@
     "@angular/platform-browser": "~11.2.4",
     "@angular/platform-browser-dynamic": "~11.2.4",
     "@angular/router": "~11.2.4",
+    "crypto": "^1.0.1",
+    "crypto-js": "^4.1.1",
     "express": "^4.17.1",
     "npm": "^6.14.11",
     "rxjs": "~6.6.0",
